@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Game</title>
+    <link rel="icon" href="play.png" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #34495e;
+            display: flex;
+            flex-direction: column;
+            height: 50vh;
+        }
+
+        /* Loader styles */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #2C3E50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        #loader .dotlottie-player {
+            width: 300px;
+            height: 300px;
+        }
+
+        header {
+            width: 100%;
+            background: #2c3e50;
+            color: white;
+            padding: 7px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .logo img {
+            height: 30px;
+            margin-right: 10px;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-icon img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .social-icon:hover img {
+            transform: scale(1.1);
+        }
+
+        canvas {
+            flex-grow: 1;
+            background: #2c3e50;
+            border: 2px solid #fff;
+        }
+        .score, .level, .game-over, .retry-button, .countdown, .resume-button, .pause-button {
+            position: absolute;
+        }
+
+        .score {
+            top: 52px;
+            left: 20px;
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .level {
+            top: 75px;
+            left: 20px;
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .game-over {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #e74c3c;
+            font-size: 30px;
+            font-weight: bold;
+            display: none;
+            text-align: center;
+        }
+
+        .retry-button {
+            top: 60%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: #e74c3c;
+            color: white;
+            font-size: 20px;
+            border: none;
+            cursor: pointer;
+            display: none;
+        }
+
+        .countdown {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 90px;
+            font-weight: bold;
+            color: #fff;
+            display: none;
+        }
+
+        .resume-button {
+            top: 68%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            font-size: 20px;
+            border: none;
+            cursor: pointer;
+            display: none;
+        }
+
+        .pause-button {
+            top: 60px;
+            right: 10px;
+            padding: 7px 17px;
+            background-color: #f39c12;
+            color: white;
+            font-size: 20px;
+            border: none;
+            cursor: pointer;
+            display: block;
+        }
+
+
+
+        /* Your existing styles for game elements */
+    </style>
+</head>
+<body>
+<!-- Loader -->
+<div id="loader">
+    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+    <dotlottie-player 
+        src="https://lottie.host/57355d02-0738-45ea-b585-69c4630620b9/XNs776xLMR.lottie" 
+        background="#2C3E50" 
+        speed="1" 
+        style="width: 300px; height: 300px" 
+        direction="1" 
+        playMode="normal" 
+        autoplay>
+    </dotlottie-player>
+</div>
+
+<script>
+    window.addEventListener('load', function() {
+        // Get the Lottie player element
+        const lottiePlayer = document.querySelector('dotlottie-player');
+
+        // Add event listener for the 'complete' event
+        lottiePlayer.addEventListener('complete', function() {
+            // Hide the loader after the animation completes
+            document.getElementById('loader').style.display = 'none';
+        });
+    });
+</script>
+
+    
+    <header>
+        <div class="logo">
+            <img src="DJPATIL031.png" alt="Logo">
+            <h1>Car Game</h1>
+        </div>
+        <div class="social-icons">
+            <a href="https://www.linkedin.com/in/mr-dhananjay-patil-0172902a2/?originalSubdomain=in" class="social-icon" target="_blank">
+                <img src="linkedin.png" alt="LinkedIn">
+            </a>
+            <a href="https://github.com/BinaryC0DE4U" class="social-icon" target="_blank">
+                <img src="Github.png" alt="GitHub">
+            </a>
+        </div>
+    </header>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Your game elements here -->
+    <div class="score" id="score">Score: 0</div>
+    <div class="level" id="level">Level: 1</div>
+    <div class="game-over" id="gameOver">Game Over!</div>
+    <button class="retry-button" id="retryButton">Retry</button>
+    <div class="countdown" id="countdown">3</div>
+    <button class="resume-button" id="resumeButton">Resume</button>
+    <button class="pause-button" id="pauseButton">Pause</button>
+
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <script>
+
+
+        // Your existing JavaScript game logic here
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const levelElement = document.getElementById('level');
+        const gameOverElement = document.getElementById('gameOver');
+        const retryButton = document.getElementById('retryButton');
+        const countdownElement = document.getElementById('countdown');
+        const resumeButton = document.getElementById('resumeButton');
+        const pauseButton = document.getElementById('pauseButton');
+
+        let score = 0;
+        let gameOver = false;
+        let level = 1;
+        let obstacleSpeed = 5;
+        const minDistanceBetweenObstacles = 150;
+        let gamePaused = false; 
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const carImg = new Image();
+        carImg.src = 'car.png';
+
+        const obstacleImg = new Image();
+        obstacleImg.src = 'obstacleCar.png';
+
+        const car = {
+            x: canvas.width / 2 - 30,  
+            y: canvas.height - 190,    
+            width: 80, 
+            height: 100, 
+            speed: 5,
+            dx: 0,
+            dy: 0
+        };
+
+        const crashSound = new Audio('Efect.mp3'); 
+        const beepSound = new Audio('beep.mp3'); 
+
+        const obstacles = [];
+
+        function createObstacle() {
+            const width = 80;   
+            const height = 100; 
+            const x = Math.random() * (canvas.width - width);  
+            const y = -height;  
+
+            let isTooClose = false;
+            for (let obstacle of obstacles) {
+                const distance = Math.sqrt(Math.pow(x - obstacle.x, 2) + Math.pow(y - obstacle.y, 2));
+                if (distance < minDistanceBetweenObstacles) {
+                    isTooClose = true;
+                    break;
+                }
+            }
+
+            if (!isTooClose) {
+                obstacles.push({ x, y, width, height });
+            }
+        }
+
+        function moveCar() {
+            car.x += car.dx;
+            if (car.x < 0) car.x = 0;
+            if (car.x + car.width > canvas.width) car.x = canvas.width - car.width;
+        }
+
+        function drawCar() {
+            ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
+        }
+
+        function updateObstacles() {
+            for (let i = 0; i < obstacles.length; i++) {
+                let obstacle = obstacles[i];
+                obstacle.y += obstacleSpeed;
+
+                if (obstacle.y > canvas.height) {
+                    obstacles.splice(i, 1);
+                    score++;
+                    if (score % 20 === 0) {  
+                        level++;
+                        obstacleSpeed += 1;  
+                        beepSound.play();  
+                    }
+                }
+
+                if (checkCollision(car, obstacle)) {
+                    gameOver = true;
+                    crashSound.play(); 
+                    gameOverElement.style.display = 'block'; 
+                }
+            }
+        }
+
+        function drawObstacles() {
+            for (let obstacle of obstacles) {
+                ctx.drawImage(obstacleImg, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            }
+        }
+
+        function drawScore() {
+            scoreElement.textContent = `Score: ${score}`;
+            levelElement.textContent = `Level: ${level}`;
+        }
+
+        function checkCollision(car, obstacle) {
+            const carCollisionBox = {
+                x: car.x + 20,
+                y: car.y + 30,
+                width: car.width - 40,
+                height: car.height - 60
+            };
+
+            const obstacleCollisionBox = {
+                x: obstacle.x + 20,
+                y: obstacle.y + 30,
+                width: obstacle.width - 40,
+                height: obstacle.height - 60
+            };
+
+            if (
+                carCollisionBox.x + carCollisionBox.width > obstacleCollisionBox.x &&
+                carCollisionBox.x < obstacleCollisionBox.x + obstacleCollisionBox.width &&
+                carCollisionBox.y + carCollisionBox.height > obstacleCollisionBox.y &&
+                carCollisionBox.y < obstacleCollisionBox.y + obstacleCollisionBox.height
+            ) {
+                return true;
+            }
+            return false;
+        }
+
+        // For non-touchscreen devices
+        function move(e) {
+            if (e.key === 'ArrowLeft' || e.key === 'a') {
+                car.dx = -car.speed;
+            } else if (e.key === 'ArrowRight' || e.key === 'd') {
+                car.dx = car.speed;
+            }
+        }
+
+        // For touchscreen devices
+        let touchStartX = 0;
+
+        function touchStart(e) {
+            touchStartX = e.touches[0].clientX;
+        }
+
+        function touchMove(e) {
+            if (e.touches.length > 0) {
+                let touchEndX = e.touches[0].clientX;
+                if (touchEndX > touchStartX + 50) {
+                    car.dx = car.speed;
+                } else if (touchEndX < touchStartX - 50) {
+                    car.dx = -car.speed;
+                }
+            }
+        }
+
+        function touchEnd() {
+            car.dx = 0;
+        }
+
+        function stopMovement() {
+            car.dx = 0;
+        }
+
+        function startGame() {
+            gameOver = false;
+            score = 0;
+            level = 1;
+            obstacleSpeed = 5;
+            obstacles.length = 0;
+            gameOverElement.style.display = 'none';
+            retryButton.style.display = 'none';
+            countdownElement.style.display = 'none';
+
+            setInterval(createObstacle, 2000);
+
+            gameLoop();
+        }
+
+        function gameLoop() {
+            if (gameOver) {
+                retryButton.style.display = 'block';
+                return;
+            }
+
+            if (!gamePaused) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                moveCar();
+                updateObstacles();
+                drawCar();
+                drawObstacles();
+                drawScore();
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function showCountdown() {
+            let countdownValue = 3;
+            countdownElement.textContent = countdownValue;
+            countdownElement.style.display = 'block';
+
+            const countdownInterval = setInterval(() => {
+                countdownValue--;
+                countdownElement.textContent = countdownValue;
+                if (countdownValue === 0) {
+                    clearInterval(countdownInterval);
+                    countdownElement.style.display = 'none';
+                    startGame();
+                }
+            }, 1000);
+        }
+
+        window.addEventListener('keydown', move);
+        window.addEventListener('keyup', stopMovement);
+
+        // Touch events
+        window.addEventListener('touchstart', touchStart);
+        window.addEventListener('touchmove', touchMove);
+        window.addEventListener('touchend', touchEnd);
+
+        retryButton.addEventListener('click', showCountdown);
+
+        resumeButton.addEventListener('click', () => {
+            gamePaused = false;  
+            resumeButton.style.display = 'none'; 
+            pauseButton.style.display = 'block'; 
+        });
+
+        pauseButton.addEventListener('click', () => {
+            gamePaused = true;
+            pauseButton.style.display = 'none'; 
+            resumeButton.style.display = 'block'; 
+        });
+
+        showCountdown(); 
+
+
+    </script>
+</body>
+</html>
